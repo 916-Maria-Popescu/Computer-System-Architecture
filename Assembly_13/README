@@ -1,5 +1,5 @@
 Small program in Assembly language (x86): 
 - Beign given two strings of words, build a new string by the concatination of the higher byte from the fisrt string and the lower byte from  the second string, in ascending order (in the signed representation)
 - ex: string1: 1224h, 9800h, 23h, 1h
-        string2: 4375h, 1100h, 26h
-        the string after the concatination: 12h, 98h, 00h, 00h, 75h, 00h, 26h 
+      string2: 4375h, 1100h, 26h
+      the string after the concatination: 12h, 98h, 00h, 00h, 75h, 00h, 26h 

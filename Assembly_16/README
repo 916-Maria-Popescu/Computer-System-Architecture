@@ -1,0 +1,11 @@
+Small assembly language program (x86):
+- Read a byte and a word from the keyboard
+- Display on the screen if the bits of the byte read
+are found consecutively among the bits of the word.
+ Example:
+ a = 10 = 0000 1010b
+ b = 256 = 0000 0001 0000 0000b
+The screen will display NO.
+ a = 0Ah = 0000 1010b
+ b = 6151h = 0110 0001 0101 0001b
+The screen will display YES.

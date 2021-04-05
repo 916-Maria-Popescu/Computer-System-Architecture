@@ -1,0 +1,35 @@
+     1                                  ;compute the value of the expression x = ((a-b)*c)/(d-a) ehre all numbers are unsigned numbers and a,b,c,d are words
+     2                                  ; for the given values this should be x = ((10+12)*2)/(d-a) = 44/(-1) = -44 (in decimal) = -2C
+     3                                  bits 32
+     4                                  global start 
+     5                                  extern exit
+     6                                  import exit msvcrt.dll
+     7                                  
+     8                                  segment data use32 class = data
+     9 00000000 0A00                        a dw 10
+    10 00000002 F4FF                        b dw -12
+    11 00000004 0200                        c dw 2
+    12 00000006 0E00                        d dw 14
+    13 00000008 00000000                    x dd 0
+    14                                  
+    15                                  segment code use32 class = code
+    16                                  start:
+    17 00000000 66A1[00000000]              mov ax, [a]
+    18 00000006 662B05[02000000]            sub ax, [b]
+    19 0000000D F72D[04000000]              imul dword [c]      ; dx:ax = ax * c (in dx is saved the high part, and in ax is saved in the low part)
+    20                                                          ; we use imul because we taka the numbers in the signed version
+    21                                                          
+    22 00000013 668B1D[06000000]            mov bx, [d]
+    23 0000001A 662B1D[00000000]            sub bx, [a]         ; bx = d-a
+    24                                      
+    25                                      
+    26 00000021 66BA0000                    mov dx, 0
+    27 00000025 66F7FB                      idiv bx      ; ax = dx:ax/bx (quotient) and dx = dx:ax%bx (remainder)
+    28 00000028 6689D8                      mov ax, bx 
+    29 0000002B 6699                        cwd                 ; convert word to doubleword for signed version
+    30 0000002D A3[08000000]                mov [x], eax
+    31                                      
+    32 00000032 6A00                        push dword 0
+    33 00000034 FF15[00000000]              call [exit]
+    34                                      
+    35                                   

@@ -1,0 +1,27 @@
+     1                                  ;compute the value of the expression x = ((a+b) * c)/ d where all numbers are unsigned numbers and a,b,c,d are all bytes
+     2                                  bits 32
+     3                                  global start 
+     4                                  
+     5                                  extern exit
+     6                                  import exit msvcrt.dll
+     7                                  
+     8                                  
+     9                                  segment data use32 class = data
+    10 00000000 0A                          a db 10
+    11 00000001 0C                          b db 12
+    12 00000002 03                          c db 3
+    13 00000003 09                          d db 9
+    14 00000004 0000                        x dw 0
+    15                                  
+    16                                  segment code use32 class = code
+    17                                  start:
+    18                                      
+    19 00000000 A0[00000000]                mov al, [a]
+    20 00000005 0205[01000000]              add al, [b]         ; al = a + b 
+    21 0000000B F625[02000000]              mul byte [c]        ; ax = al * c = (a+b)*c 
+    22 00000011 F635[03000000]              div byte [d]        ; al = ax/d (quotient) and ah = ax%d (remainder)
+    23 00000017 B400                        mov ah, 0           ; convert byte al into word ah (unsigned)
+    24 00000019 66A3[04000000]              mov [x], ax 
+    25                                      
+    26 0000001F 6A00                        push dword 0
+    27 00000021 FF15[00000000]              call [exit]

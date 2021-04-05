@@ -1,0 +1,38 @@
+     1                                  ;being given a string of bytes containing lowercase letters, build a new string of bytes containing the corresponing uppercase letters
+     2                                  
+     3                                  bits 32
+     4                                  global start
+     5                                  extern exit
+     6                                  import exit msvcrt.dll
+     7                                  
+     8                                  
+     9                                  segment data use32 class = data:
+    10                                      string1 db ''
+    11                                      len equ $-string1
+    12                                      string2 times len db 0
+    13                                      
+    14                                  segment code use32 class = code:
+    15                                  
+    16                                  start:
+    17 00000000 BE[00000000]                mov esi, string1      ; the source string is saved in esi
+    18 00000005 BF[00000000]                mov edi, string2      ; the destination string is saved in edi
+    19                                      
+    20 0000000A B900000000                  mov ecx, len          ; in ecx is stored the lenght of the string 
+    21                                                            ; we prepare ecx for the loop
+    22 0000000F E30A                        jecxz final       
+    23                                      lower_to_upper:
+    24                                      
+    25 00000011 8A06                            mov al, [esi]
+    26 00000013 2C20                            sub al, 'a'- 'A'
+    27 00000015 8807                            mov [edi], al 
+    28                                          
+    29 00000017 46                              inc esi
+    30 00000018 47                              inc edi 
+    31                                          
+    32 00000019 E2F6                        loop lower_to_upper
+    33                                  
+    34                                      
+    35                                      
+    36                                      final:
+    37 0000001B 6A00                        push dword 0
+    38 0000001D FF15[00000000]              call [exit]

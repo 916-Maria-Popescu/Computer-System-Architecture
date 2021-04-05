@@ -1,0 +1,41 @@
+     1                                  ; Se citeste un numar n de la tastatura n 
+     2                                  
+     3                                  
+     4                                  bits 32
+     5                                  global start
+     6                                  extern exit, printf, scanf 
+     7                                  
+     8                                  import exit msvcrt.dll
+     9                                  import printf msvcrt.dll
+    10                                  import scanf msvcrt.dll
+    11                                  
+    12                                  segment data use32 class = data
+    13 00000000 00000000                    n dd 0
+    14 00000004 6E203D2000000000            message dd "n = ", 0
+    15 0000000C 2564000000000000            format dd "%d", 0
+    16 00000014 206E20657374652025-         format2 dd " n este %d", 0
+    16 0000001D 64000000000000     
+    17                                      
+    18                                  segment code use32 class = code 
+    19                                  
+    20                                  start :
+    21                                      ; call printf (format, value)
+    22 00000000 68[04000000]                push message
+    23 00000005 FF15[00000000]              call [printf]
+    24 0000000B 83C404                      add esp, 4 * 1
+    25                                      
+    26                                      ; call scanf (format, variable)
+    27 0000000E 68[00000000]                push n
+    28 00000013 68[0C000000]                push format
+    29 00000018 FF15[00000000]              call [scanf]
+    30 0000001E 83C408                      add esp, 4 * 2
+    31                                      
+    32 00000021 A1[00000000]                mov eax, [n]
+    33                                      
+    34 00000026 50                          push eax
+    35 00000027 68[14000000]                push format2
+    36 0000002C FF15[00000000]              call [printf]
+    37 00000032 83C408                      add esp, 4 * 2
+    38                                      
+    39 00000035 6A00                        push dword 0
+    40 00000037 FF15[00000000]              call [exit]

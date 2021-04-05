@@ -1,0 +1,83 @@
+     1                                  ; Beign given two strings of words, build a new string by the concatination of the higher byte from the fisrt string and the lower byte from
+     2                                  ; the second string, in ascending order (in the signed representation)
+     3                                  ; ex: string1: 1224h, 9800h, 23h, 1h
+     4                                  ;     string2: 4375h, 1100h, 26h
+     5                                  ;     the string after the concatination: 12h, 98h, 00h, 00h, 75h, 00h, 26h 
+     6                                  ;     the strinf sorted: 
+     7                                        
+     8                                        
+     9                                  bits 32 
+    10                                  global start 
+    11                                  extern exit
+    12                                  import exit msvcrt.dll
+    13                                  
+    14                                  segment data use32 class = data:
+    15 00000000 040055260A00                string1 dw 4h, 2655h, 10
+    16                                      len1 equ ($-string1)/2
+    17 00000006 4523A50068039039            string2 dw 2345h, 0a5h, 368h, 3990h
+    18                                      len2 equ ($-string2)/2
+    19 0000000E 00<rept>                    string3 times len1+len2 db 0
+    20                                      
+    21                                  segment code use32 class = code:
+    22                                  start:
+    23                                  
+    24 00000000 BF[0E000000]                mov edi, string3
+    25                                  
+    26                                      ; first we store all the higher bytes from the first string in string3
+    27 00000005 BE[00000000]                mov esi, string1
+    28 0000000A B903000000                  mov ecx, len1
+    29 0000000F FC                          cld 
+    30                                      loop1:
+    31                                      
+    32 00000010 66AD                            lodsw               ; AX = [esi], esi + 2
+    33                                                              ; AH = higher byte (which we need)    AL = lower byte
+    34 00000012 88E0                            mov al, ah
+    35 00000014 B400                            mov ah, 0           ; clear ah, now ax = al = the higher byte
+    36                                          
+    37 00000016 AA                              stosb               ; [edi] = al, edi + 1
+    38                                   
+    39 00000017 E2F7                        loop loop1
+    40                                      
+    41                                      ; now we store all the lower bytes from the second string in string 3
+    42 00000019 BE[06000000]                mov esi, string2
+    43 0000001E B904000000                  mov ecx, len2
+    44 00000023 FC                          cld
+    45                                      loop2:       
+    46                                      
+    47 00000024 66AD                            lodsw                           ; AX = [esi], esi + 2
+    48                                                                          ; AH = higher byte   AL = lower byte(which we need)
+    49 00000026 AA                              stosb                           ; [edi] = al, edi + 1
+    50                                  
+    51 00000027 E2FB                        loop loop2
+    52                                      
+    53                                      ; now we need to sort the string
+    54                                      
+    55 00000029 66BA0100                    mov dx, 1
+    56                                      check_order:
+    57                                      
+    58 0000002D 6683FA00                        cmp dx, 0                       ;dx = 0 means that in there was no change in the string, so the string is sorted
+    59 00000031 7423                            je final
+    60 00000033 66BA0000                        mov dx, 0
+    61 00000037 BE[0E000000]                    mov esi, string3
+    62 0000003C B907000000                      mov ecx, len1 + len2
+    63 00000041 FC                              cld 
+    64                                          
+    65                                          loop_sort:
+    66                                          
+    67 00000042 AC                                  lodsb                       ; al = [esi], inc esi 
+    68 00000043 8A1E                                mov bl, byte[esi]           ; bl = [esi+1]
+    69 00000045 38D8                                cmp al, bl
+    70 00000047 7E09                                jle already_sorted          ; if esi <= esi +1 jump to already_sorted
+    71 00000049 8806                                mov [esi], al
+    72 0000004B 885EFF                              mov [esi-1], bl 
+    73 0000004E 66BA0100                            mov dx, 1
+    74                                              
+    75                                           already_sorted:
+    76 00000052 E2EE                            loop loop_sort
+    77                                          
+    78 00000054 EBD7                            jmp check_order
+    79                                          
+    80                                      
+    81                                      final:
+    82 00000056 6A00                        push dword 0
+    83 00000058 FF15[00000000]              call [exit]

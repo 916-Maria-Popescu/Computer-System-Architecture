@@ -1,0 +1,117 @@
+     1                                  ; Se da un fisier cu propozitii, propozitiile se termina in "\". Sa se scrie in celalat fisier doar propozitiile impare
+     2                                  
+     3                                  bits 32
+     4                                  global start
+     5                                  
+     6                                  extern exit, fopen, fclose, fread, printf, rename, remove, fwrite, perror, fprintf
+     7                                  
+     8                                  import exit msvcrt.dll
+     9                                  import fclose msvcrt.dll
+    10                                  import fread msvcrt.dll
+    11                                  import printf msvcrt.dll
+    12                                  import rename msvcrt.dll
+    13                                  import remove msvcrt.dll
+    14                                  import fwrite msvcrt.dll
+    15                                  import fopen msvcrt.dll
+    16                                  import perror msvcrt.dll
+    17                                  import fprintf msvcrt.dll
+    18                                  
+    19                                  segment data use32 class = data
+    20                                  
+    21 00000000 74657874312E747874-         file_name1 db 'text1.txt', 0
+    21 00000009 00                 
+    22 0000000A 74657874322E747874-         file_name2 db 'text2.txt', 0
+    22 00000013 00                 
+    23 00000014 7200                        read_mod db 'r', 0
+    24 00000016 7700                        write_mod db 'w', 0
+    25 00000018 00<rept>                    sentence times 100 db 0 
+    26 0000007C 204D79206576656E20-         format db " My even sentence is : %s", 0
+    26 00000085 73656E74656E636520-
+    26 0000008E 6973203A20257300   
+    27 00000096 00                          c times 1 db 0
+    28 00000097 FFFFFFFF                    handler1 dd -1
+    29 0000009B FFFFFFFF                    handler2 dd -1
+    30 0000009F 01                          counter db 1
+    31 000000A0 02                          two db 2
+    32                                     
+    33                                  segment code use32 class = code
+    34                                  
+    35                                  start:
+    36                                      ; call fopen (file_name, mod) for the file with the sentences
+    37 00000000 68[14000000]                push dword read_mod
+    38 00000005 68[00000000]                push dword file_name1
+    39 0000000A FF15[00000000]              call [fopen]
+    40 00000010 83C408                      add esp, 4 *2
+    41                                      
+    42 00000013 A3[97000000]                mov dword [handler1], eax 
+    43 00000018 83F800                      cmp eax, 0 
+    44 0000001B 0F84A3000000                je final 
+    45                                      
+    46                                      ; call fopen for the dest file
+    47 00000021 68[16000000]                push write_mod
+    48 00000026 68[0A000000]                push file_name2
+    49 0000002B FF15[00000000]              call [fopen]
+    50 00000031 83C408                      add esp, 4 * 2
+    51                                      
+    52 00000034 A3[9B000000]                mov dword [handler2], eax
+    53 00000039 83F800                      cmp eax, 0
+    54 0000003C 0F8482000000                je final 
+    55                                    
+    56 00000042 BF[18000000]                mov edi, sentence
+    57                                      
+    58                                      mainloop:
+    59                                          myloop:
+    60                                          ; call fread for first file, fread (the adress od the dest string, 1, n times, handler
+    61 00000047 FF35[97000000]                      push dword [handler1]
+    62 0000004D 6A01                                push dword 1
+    63 0000004F 6A01                                push dword 1
+    64 00000051 68[96000000]                        push c
+    65 00000056 FF15[00000000]                      call [fread]
+    66 0000005C 83C410                              add esp, 4 * 4 
+    67                                          
+    68 0000005F 83F800                              cmp eax, 0 ; verfies if eax read something
+    69 00000062 7442                                je close 
+    70                                          
+    71 00000064 A0[96000000]                        mov al , byte [c]
+    72 00000069 3C2F                                cmp al, '/'
+    73 0000006B 7403                                je end_sentence
+    74                                              
+    75 0000006D AA                                  STOSB
+    76                                          
+    77 0000006E EBD7                            jmp myloop  
+    78                                          
+    79                                          end_sentence:
+    80 00000070 FE05[9F000000]                  inc byte [counter]
+    81 00000076 A0[9F000000]                    mov al, byte [counter]
+    82 0000007B F635[A0000000]                  div byte [two]   ; AL ← AX / 2, AH ← AX % 2 ( 1 or 0 )
+    83 00000081 80FC00                          cmp ah, 0
+    84 00000084 741E                            je even_sentence
+    85                                          
+    86                                          ;call fprintf(handler, mod, value)
+    87                                          
+    88 00000086 68[18000000]                    push dword sentence
+    89 0000008B 68[7C000000]                    push dword format
+    90 00000090 FF35[9B000000]                  push dword [handler2]
+    91 00000096 FF15[00000000]                  call [fprintf]
+    92 0000009C 83C40C                          add esp, 4 * 3
+    93                                         
+    94 0000009F 83F800                          cmp eax, 0
+    95 000000A2 7402                            je close
+    96                                          
+    97                                          even_sentence:
+    98 000000A4 EBA1                        jmp mainloop
+    99                                       
+   100                                      close:
+   101                                          ; call fclose for both files
+   102                                          
+   103 000000A6 FF35[97000000]                  push dword [handler1]
+   104 000000AC FF15[00000000]                  call [fclose]
+   105 000000B2 83C404                          add esp, 4
+   106                                          
+   107 000000B5 FF35[9B000000]                  push dword[handler2]
+   108 000000BB FF15[00000000]                  call [fclose]
+   109 000000C1 83C404                          add esp, 4
+   110                                  
+   111                                      final :
+   112 000000C4 6A00                        push dword 0
+   113 000000C6 FF15[00000000]              call [exit]

@@ -1,0 +1,31 @@
+     1                                  ;being given a string of bytes containing lowercase letters, build a new string of bytes containing the corresponing uppercase letters
+     2                                  
+     3                                  bits 32
+     4                                  global start
+     5                                  extern exit
+     6                                  import exit msvcrt.dll
+     7                                  
+     8                                  
+     9                                  segment data use32 class = data:
+    10 00000000 414243444546                string1 db 'ABCDEF'
+    11                                      len equ $-string1
+    12 00000006 00<rept>                    string2 times len db 0
+    13                                      
+    14                                  segment code use32 class = code:
+    15                                  
+    16                                  start:
+    17 00000000 BE00000000                  mov esi, 0
+    18                                      
+    19                                      upper_from_lower:
+    20 00000005 8A86[00000000]                  mov al, [string1 + esi]   ;the byte from the offset [string1 + esi] is stored in ax
+    21                                                                    ; esi will be 1, 2, 3,....., len
+    22 0000000B 0420                            add al, 'a' - 'A'
+    23 0000000D 8886[06000000]                  mov [string2+esi], al 
+    24                                          
+    25 00000013 46                              inc esi                   ; esi = esi + 1
+    26 00000014 83FE06                          cmp esi, len 
+    27 00000017 72EC                            jb upper_from_lower       ; will jump to the label if esi is bellow the lenght of the string 
+    28                                          
+    29                                          
+    30 00000019 6A00                        push dword 0
+    31 0000001B FF15[00000000]              call [exit]

@@ -1,0 +1,72 @@
+     1                                  ;A number a (integer in decimal) is given from the keyboard. Print the number in base 10 and then in base 16 (signed representation)
+     2                                  ;in urmatorul format: "a = <base_10> (baza 10), a = <base_16> (baza 16)"
+     3                                  
+     4                                  bits 32 ; assembling for the 32 bits architecture
+     5                                  
+     6                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     7                                  global start        
+     8                                  
+     9                                  ; declare external functions needed by our program
+    10                                  extern exit, printf, scanf             
+    11                                  import exit msvcrt.dll    
+    12                                  import printf msvcrt.dll    
+    13                                  import scanf msvcrt.dll     
+    14                                  
+    15                                  ; our data is declared here (the variables needed by our program)
+    16                                  segment data use32 class=data
+    17 00000000 00000000                    a dd 0
+    18 00000004 446563696D616C3A20-         print_decimal dd "Decimal: %d", 0
+    18 0000000D 25640000000000     
+    19 00000014 202020202020204865-         print_hexa dd "       Hexadecimal: %x", 0    ; unsigned !!! hexadecimal
+    19 0000001D 7861646563696D616C-
+    19 00000026 3A2025780000000000-
+    19 0000002F 00                 
+    20 00000030 202020202020486578-         print_minus dd "      Hexadecimal: -%x", 0
+    20 00000039 61646563696D616C3A-
+    20 00000042 202D25780000000000-
+    20 0000004B 00                 
+    21 0000004C 2564000000000000            format_decimal dd "%d", 0
+    22 00000054 613D000000000000            format1 dd "a=", 0
+    23                                  ; our code starts here
+    24                                  segment code use32 class=code
+    25                                      start:
+    26                                          ;call printf(format, value1, ...)
+    27 00000000 68[54000000]                    push dword format1
+    28 00000005 FF15[00000000]                  call [printf]
+    29 0000000B 83C404                          add esp, 4*1
+    30                                          
+    31                                          ;call scanf(format, variable-offset)
+    32 0000000E 68[00000000]                    push dword a 
+    33 00000013 68[4C000000]                    push dword format_decimal
+    34 00000018 FF15[00000000]                  call [scanf]
+    35 0000001E 83C408                          add esp, 4*2
+    36                                          
+    37                                          ;call printf for printing a in decimal
+    38 00000021 FF35[00000000]                  push dword [a]
+    39 00000027 68[04000000]                    push dword print_decimal
+    40 0000002C FF15[00000000]                  call [printf]
+    41 00000032 83C408                          add esp, 4*2
+    42                                          
+    43 00000035 A1[00000000]                    mov eax, dword[a]
+    44 0000003A 83F800                          cmp eax, 0
+    45 0000003D 7D13                            jge positive
+    46 0000003F F7D8                            neg eax         ; eax = - eax
+    47                                          
+    48                                          ;call printf
+    49 00000041 50                              push dword eax
+    50 00000042 68[30000000]                    push dword print_minus
+    51 00000047 FF15[00000000]                  call [printf]
+    52 0000004D 83C408                          add esp, 4*2
+    53 00000050 EB0F                            jmp final
+    54                                          
+    55                                          positive:
+    56                                          
+    57                                          ; call printf for hexadecimal
+    58 00000052 50                              push dword eax
+    59 00000053 68[14000000]                    push dword print_hexa
+    60 00000058 FF15[00000000]                  call [printf]
+    61 0000005E 83C408                          add esp, 4*2
+    62                                          
+    63                                          final:
+    64 00000061 6A00                            push dword 0
+    65 00000063 FF15[00000000]                  call [exit]

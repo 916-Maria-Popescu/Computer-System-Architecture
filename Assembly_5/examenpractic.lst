@@ -1,0 +1,105 @@
+     1                                  ;Fie un fisier -numele dat in segmentaul de date- ce contine mai multe note separate prin spatiu (notele sunt de la 1 la 10). Sa se citeasca ;aceste note si sa se calculeze suma celor mai mici decat 8 iar rezultatul
+     2                                  
+     3                                  bits 32 
+     4                                  
+     5                                  global start        
+     6                                  
+     7                                  extern exit, fopen, fread, fclose, fprintf, printf
+     8                                  import exit msvcrt.dll  
+     9                                  import fopen msvcrt.dll  
+    10                                  import fread msvcrt.dll
+    11                                  import fclose msvcrt.dll
+    12                                  import fprintf msvcrt.dll
+    13                                  import printf msvcrt.dll
+    14                                  
+    15                                  segment data use32 class=data
+    16 00000000 6578616D656E707465-         nume_fisier db "examenptext.txt", 0  
+    16 00000009 78742E74787400     
+    17 00000010 612B00                      mod_acces db "a+", 0                        
+    18 00000013 FFFFFFFF                    handler dd -1         
+    19                                      len equ 100                                             
+    20 00000017 00<rept>                    text times len db 0  
+    21 0000007B 2020202053756D613A-         format dd "    Suma: %d", 0
+    21 00000084 20256400000000     
+    22 0000008B 00000000                    result dd 0
+    23                                  
+    24                                  
+    25                                  segment code use32 class=code
+    26                                      start:
+    27                                          ; fopen 
+    28 00000000 68[10000000]                    push dword mod_acces     
+    29 00000005 68[00000000]                    push dword nume_fisier
+    30 0000000A FF15[00000000]                  call [fopen]
+    31 00000010 83C408                          add esp, 4*2                
+    32                                  
+    33 00000013 A3[13000000]                    mov [handler], eax   
+    34                                          
+    35                                         
+    36 00000018 83F800                          cmp eax, 0
+    37 0000001B 747A                            je final
+    38                                          
+    39                                          ;fread 
+    40 0000001D FF35[13000000]                  push dword [handler]
+    41 00000023 6A64                            push dword len
+    42 00000025 6A01                            push dword 1
+    43 00000027 68[17000000]                    push dword text        
+    44 0000002C FF15[00000000]                  call [fread]
+    45 00000032 83C410                          add esp, 4*4                 
+    46                                          
+    47                                          ; fclose(descriptor)
+    48 00000035 FF35[13000000]                  push dword [handler]
+    49 0000003B FF15[00000000]                  call [fclose]
+    50 00000041 83C404                          add esp, 4
+    51                                          
+    52                                          ; acum avem in 'text' toate notele si spatiile libere
+    53 00000044 BE[17000000]                    mov esi, text 
+    54 00000049 BB00000000                      mov ebx, 0
+    55 0000004E FC                              cld
+    56                                          
+    57                                          myloop:
+    58                                              
+    59 0000004F B800000000                          mov eax, 0
+    60 00000054 AC                                  lodsb ; al = primul caracter salvat in text
+    61                                              
+    62 00000055 3C00                                cmp al, 0
+    63 00000057 740E                                je stop
+    64                                              
+    65 00000059 3C20                                cmp al, ' '
+    66 0000005B 7408                                je space
+    67                                              
+    68 0000005D 3C38                                cmp al, '8'
+    69 0000005F 7304                                jae space
+    70                                              
+    71 00000061 2C30                                sub al, 30h
+    72 00000063 01C3                                add ebx, eax
+    73                                              
+    74                                              space:
+    75                                              
+    76 00000065 EBE8                            jmp myloop
+    77                                          ; the sum is stored in ebx 
+    78                                          
+    79                                          stop:
+    80                                          
+    81 00000067 011D[8B000000]                  add dword [result], ebx 
+    82                                          ;call fprintf in order to print the sum in the file
+    83                                          ; fprintf(desc, mod, value)
+    84 0000006D 68[8B000000]                    push dword result 
+    85 00000072 68[7B000000]                    push dword format
+    86 00000077 FF35[13000000]                  push dword [handler]
+    87 0000007D FF15[00000000]                  call [fprintf]
+    88 00000083 83C40C                          add esp, 4 * 3
+    89                                          
+    90 00000086 83F800                          cmp eax, 0
+    91 00000089 7400                            je close
+    92                                          
+    93                                          
+    94                                          close: 
+    95                                          
+    96                                          ; fclose (descriptor)
+    97 0000008B FF35[13000000]                  push dword [handler]
+    98 00000091 FF15[00000000]                  call [fclose]
+    99                                          
+   100                                        final:
+   101                                          ; exit(0)
+   102 00000097 6A00                            push    dword 0      
+   103 00000099 FF15[00000000]                  call    [exit]     

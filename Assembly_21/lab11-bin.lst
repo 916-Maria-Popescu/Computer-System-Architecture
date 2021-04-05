@@ -1,0 +1,42 @@
+     1                                  bits 32 
+     2                                  global  binary_base
+     3                                  segment  data use32 class=data ; the data segment where the variables are declared 
+     4                                  
+     5 00000000 02000000                    two dd 2
+     6 00000004 <res 00000008>              result resb 8
+     7                                      
+     8                                  segment  code use32 public code ; code segment
+     9                                      binary_base:
+    10 00000000 8B442404                        mov eax, [esp + 4]                    ; eax takes the parameter from the function
+    11 00000004 BB07000000                      mov ebx, 7
+    12                                  
+    13                                          convert_to_base_2:
+    14 00000009 3C00                                cmp al, 0
+    15 0000000B 7416                                je finish
+    16                                          
+    17 0000000D F635[00000000]                      div byte [two]                     ; AL ← AX / 2, AH ← AX % 2 ( 1 or 0 )
+    18 00000013 80C430                              add ah, 30h                         ; transform the remainder into its string representation
+    19                                                                                 ; 1 into '1' and 0 into '0'
+    20 00000016 88A3[04000000]                      mov [result + ebx], ah             ; add the new char ('0' or '1') to the string
+    21 0000001C 83EB01                              sub ebx, 1
+    22 0000001F B400                                mov ah, 0                          ; clear ah (we don't need the remainder anymore)
+    23                                              
+    24 00000021 EBE6                            jmp convert_to_base_2
+    25                                          
+    26                                          finish:
+    27                                          
+    28                                          ; we stil need to transform the leftmost 0 into '0' (because when the binary form of the number contains only zeros, it's equal to zero and the loop stops 
+    29 00000023 BB00000000                      mov ebx, 0
+    30                                          zero:
+    31 00000028 80BB[04000000]00                    cmp byte [result + ebx], 0               
+    32 0000002F 750C                                jne final
+    33                                              
+    34 00000031 8083[04000000]30                    add byte [result + ebx], 30h            ; transform from 0 into '0'
+    35 00000038 83C301                              add ebx, 1
+    36 0000003B EBEB                                jmp zero
+    37                                              
+    38                                          final:
+    39 0000003D B8[04000000]                    mov eax, result                      ; let eax, the "parameter" of this function hold the pointer to the start of the newly ;created string
+    40                                          
+    41 00000042 C20400                          ret 4                           ; return to the main program and clean 4 bytes from the stack
+    42                                           

@@ -1,0 +1,61 @@
+     1                                  
+     2                                  bits 32
+     3                                  global start
+     4                                  
+     5                                  extern exit, fopen, fclose, fread, printf , scanf
+     6                                  import printf msvcrt.dll
+     7                                  import exit msvcrt.dll
+     8                                  import fopen msvcrt.dll
+     9                                  import fclose msvcrt.dll
+    10                                  import fread msvcrt.dll
+    11                                  import scanf msvcrt.dll
+    12                                  
+    13                                  segment data use32 class = data
+    14 00000000 746578742E74787400          file_name db 'text.txt', 0
+    15 00000009 7200                        read_mode db 'r', 0 
+    16 0000000B 7700                        wrtie_mode db 'w', 0
+    17 0000000D FFFFFFFF                    handler dd -1 
+    18                                      len equ 100
+    19 00000011 00<rept>                    mytext times len db 0 
+    20 00000075 256300                      format db "%c" , 0
+    21 00000078 0000                        result dw 0
+    22 0000007A 00000000                    n dd 0
+    23                                      
+    24                                  segment code use32 class = code
+    25                                   start:
+    26                                      ; call fopen (file_name, mod)
+    27 00000000 68[0B000000]                push dword wrtie_mode
+    28 00000005 68[00000000]                push dword file_name
+    29 0000000A FF15[00000000]              call [fopen]
+    30 00000010 83C408                      add esp, 4 * 2
+    31                                      
+    32 00000013 A3[0D000000]                mov [handler], eax ; the descriptor is returned form fopen in eax is now saved in handler
+    33 00000018 83F800                      cmp eax, 0
+    34 0000001B 742A                        je final
+    35                                      
+    36 0000001D B905000000                  mov ecx, 5
+    37                                      loop:
+    38                                          ; call scanf (format, variabila)
+    39 00000022 68[7A000000]                    push dword n
+    40 00000027 68[75000000]                    push dword format
+    41 0000002C FF15[00000000]                  call [scanf]
+    42 00000032 83C408                          add esp, 4 * 2
+    43                                          
+    44                                          ; call fprintf(desc, mod, value)
+    45 00000035 68[7A000000]                    push n
+    46 0000003A 68[75000000]                    push format
+    47 0000003F 68[0D000000]                    push handler
+    48 00000044 83C408                          add esp, 4 * 2
+    49                                          
+    50                                          
+    51                                      
+    52                                  
+    53                                      final :
+    54 00000047 6A00                        push dword 0
+    55 00000049 FF15[00000000]              call [exit]
+    56                                      
+    57                                      
+    58                                      
+    59                                      
+    60                                      
+    61                                      

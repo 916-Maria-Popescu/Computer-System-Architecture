@@ -1,0 +1,14 @@
+global  start 
+
+extern  exit ; we inform the assembler that the exit symbol is foreign, i.e. it exists even if we won't be defining it
+
+import  exit msvcrt.dll; exit is a function that ends the process, it is defined in msvcrt.dll
+        ; msvcrt.dll contains exit, printf and all the other important C-runtime functions
+segment  data use32 class=data ; the data segment where the variables are declared 
+
+     s db 5, 25, 55, 122
+     len equ $-s
+     d times len db 0
+    
+    segment  code use32 class=code ; code segment
+start:

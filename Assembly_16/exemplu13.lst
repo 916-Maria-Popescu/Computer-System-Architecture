@@ -1,0 +1,189 @@
+     1                                  ;Problema 19 lab 8
+     2                                  ;Sa se citeasca de la tastatura un octet si un cuvant. Sa se afiseze pe ecran daca bitii octetului citit 
+     3                                  ;se regasesc consecutiv printre bitii cuvantului. Exemplu:
+     4                                  ;a = 10 = 0000 1010b
+     5                                  ;b = 256 = 0000 0001 0000 0000b
+     6                                  ;Pe ecran se va afisa NU.
+     7                                  ;a = 0Ah = 0000 1010b
+     8                                  ;b = 6151h = 0110 0001 0101 0001b
+     9                                  
+    10                                  bits 32 ; assembling for the 32 bits architecture
+    11                                  
+    12                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+    13                                  global start
+    14                                  
+    15                                  extern exit, printf, scanf             
+    16                                  import exit msvcrt.dll    
+    17                                  import printf msvcrt.dll    
+    18                                  import scanf msvcrt.dll     
+    19                                  
+    20                                  segment data use32 class=data
+    21 00000000 00000000                    a dd 0
+    22 00000004 00000000                    b dd 0
+    23 00000008 2564000000000000            format_decimal dd "%d", 0
+    24 00000010 612862797465293D00          print_a db "a(byte)=", 0
+    25 00000019 6228776F7264293D00          print_b db "b(word)=", 0
+    26 00000022 61203D202564286465-         format_a db "a = %d(decimal) = %d%d%d%d %d%d%d%d (binary)", 10, 13, 0
+    26 0000002B 63696D616C29203D20-
+    26 00000034 256425642564256420-
+    26 0000003D 256425642564256420-
+    26 00000046 2862696E617279290A-
+    26 0000004F 0D00               
+    27 00000051 62203D202564286465-         format_b db "b = %d(decimal) = %d%d%d%d %d%d%d%d %d%d%d%d %d%d%d%d (binary)", 10, 13, 0
+    27 0000005A 63696D616C29203D20-
+    27 00000063 256425642564256420-
+    27 0000006C 256425642564256420-
+    27 00000075 256425642564256420-
+    27 0000007E 256425642564256420-
+    27 00000087 2862696E617279290A-
+    27 00000090 0D00               
+    28 00000092 5965730A0D00                print_yes db "Yes", 10, 13, 0
+    29 00000098 4E6F00                      print_no db "No", 0
+    30 0000009B 00000000<rept>              binary_representation_a times 8 dd 0 
+    31 000000BB 00000000<rept>              binary_representation_b times 16 dd 0
+    32                                      
+    33                                  
+    34                                  ; our code starts here
+    35                                  segment code use32 class=code
+    36                                      start:
+    37                                      
+    38                                      ; printf (format, value1, value2,....) for a = 
+    39 00000000 68[10000000]                push dword print_a
+    40 00000005 FF15[00000000]              call [printf]
+    41 0000000B 83C404                      add esp, 4
+    42                                      
+    43                                      ;scanf (format, variable-offset) for a
+    44 0000000E 68[00000000]                push dword a
+    45 00000013 68[08000000]                push dword format_decimal
+    46 00000018 FF15[00000000]              call [scanf]
+    47 0000001E 83C408                      add esp, 4*2
+    48                                      
+    49                                      ;printf for b = 
+    50 00000021 68[19000000]                push dword print_b
+    51 00000026 FF15[00000000]              call [printf]
+    52 0000002C 83C404                      add esp, 4
+    53                                      
+    54                                      ; scanf for b
+    55 0000002F 68[04000000]                push dword b
+    56 00000034 68[08000000]                push dword format_decimal
+    57 00000039 FF15[00000000]              call [scanf]
+    58 0000003F 83C408                      add esp, 4*2
+    59                                    
+    60                                      ;---------------------binary for a
+    61 00000042 BE[9B000000]                mov esi, binary_representation_a
+    62 00000047 B301                        mov bl, 00000001b                                ; 00000...00001 (32 digits)
+    63 00000049 B908000000                  mov ecx, 8                                      ; prepare ecx for the loop, we have 32 digits in number a, so we'll check everyone of them
+    64                                      
+    65                                      myloop:
+    66 0000004E A0[00000000]                    mov al, byte[a]
+    67 00000053 20D8                            and al, bl
+    68 00000055 3C00                            cmp al, 0 
+    69 00000057 7408                            je zero
+    70                                          
+    71                                          ; one
+    72 00000059 C70601000000                    mov [esi], dword 1
+    73 0000005F EB06                            jmp continue_loop
+    74                                          
+    75                                          zero:
+    76 00000061 C70600000000                    mov [esi], dword 0
+    77                                          
+    78                                          continue_loop:
+    79 00000067 83C604                          add esi , 4
+    80 0000006A D1E3                            shl ebx, 1
+    81                                        
+    82 0000006C E2E0                        loop myloop  
+    83                                  
+    84                                      ; printf "a = %d = %d"
+    85 0000006E FF35[9B000000]              push dword [binary_representation_a]
+    86 00000074 FF35[9F000000]              push dword [binary_representation_a+4]
+    87 0000007A FF35[A3000000]              push dword [binary_representation_a+8]
+    88 00000080 FF35[A7000000]              push dword [binary_representation_a+12]
+    89 00000086 FF35[AB000000]              push dword [binary_representation_a+16]
+    90 0000008C FF35[AF000000]              push dword [binary_representation_a+20]
+    91 00000092 FF35[B3000000]              push dword [binary_representation_a+24]
+    92 00000098 FF35[B7000000]              push dword [binary_representation_a+28]
+    93 0000009E FF35[00000000]              push dword [a]
+    94 000000A4 68[22000000]                push dword format_a
+    95 000000A9 FF15[00000000]              call [printf]
+    96 000000AF 83C428                      add esp, 4 * 10
+    97                                      
+    98                                      
+    99                                      ;---------------------------------binary for b
+   100 000000B2 BF[BB000000]                mov edi, binary_representation_b
+   101 000000B7 66BB0100                    mov bx, 0000000000000001b                       ; 00000...00001 (16 digits)
+   102 000000BB B910000000                  mov ecx, 16                                      ; prepare ecx for the loop, we have 16 digits in number a, so we'll check everyone of them
+   103                                      
+   104                                      myloop2:
+   105 000000C0 66A1[04000000]                  mov ax, word[b]
+   106 000000C6 6621D8                          and ax, bx
+   107 000000C9 6683F800                        cmp ax, 0 
+   108 000000CD 7408                            je zero2
+   109                                          
+   110                                          ; one
+   111 000000CF C70701000000                    mov [edi], dword 1
+   112 000000D5 EB06                            jmp continue_loop2
+   113                                          
+   114                                          zero2:
+   115 000000D7 C70700000000                    mov [edi], dword 0
+   116                                          
+   117                                          continue_loop2:
+   118 000000DD 83C704                          add edi , 4
+   119 000000E0 D1E3                            shl ebx, 1
+   120                                        
+   121 000000E2 E2DC                        loop myloop2  
+   122                                  
+   123                                      ; printf "b = %d = %d"
+   124 000000E4 FF35[BB000000]              push dword [binary_representation_b]
+   125 000000EA FF35[BF000000]              push dword [binary_representation_b+4]
+   126 000000F0 FF35[C3000000]              push dword [binary_representation_b+8]
+   127 000000F6 FF35[C7000000]              push dword [binary_representation_b+12]
+   128 000000FC FF35[CB000000]              push dword [binary_representation_b+16]
+   129 00000102 FF35[CF000000]              push dword [binary_representation_b+20]
+   130 00000108 FF35[D3000000]              push dword [binary_representation_b+24]
+   131 0000010E FF35[D7000000]              push dword [binary_representation_b+28]
+   132 00000114 FF35[DB000000]              push dword [binary_representation_b+32]
+   133 0000011A FF35[DF000000]              push dword [binary_representation_b+36]
+   134 00000120 FF35[E3000000]              push dword [binary_representation_b+40]
+   135 00000126 FF35[E7000000]              push dword [binary_representation_b+44]
+   136 0000012C FF35[EB000000]              push dword [binary_representation_b+48]
+   137 00000132 FF35[EF000000]              push dword [binary_representation_b+52]
+   138 00000138 FF35[F3000000]              push dword [binary_representation_b+56]
+   139 0000013E FF35[F7000000]              push dword [binary_representation_b+60]
+   140 00000144 FF35[04000000]              push dword [b]
+   141 0000014A 68[51000000]                push dword format_b
+   142 0000014F FF15[00000000]              call [printf]
+   143 00000155 83C448                      add esp, 4 * 18
+   144                                      
+   145                                      ;-------------------------------------
+   146 00000158 B908000000                  mov ecx, 8 
+   147 0000015D BB00000000                  mov ebx, 0
+   148 00000162 668B1D[04000000]            mov bx, word[b]
+   149                                      
+   150                                      compare:
+   151                                      
+   152 00000169 A0[00000000]                    mov al, byte[a]
+   153 0000016E 30D8                            xor al, bl              
+   154 00000170 7415                            je yes
+   155 00000172 66D1EB                          shr bx, 1
+   156                                          
+   157 00000175 E2F2                        loop compare
+   158                                          
+   159                                      
+   160                                     ; call printf for NO
+   161 00000177 68[98000000]                push dword print_no
+   162 0000017C FF15[00000000]              call [printf]
+   163 00000182 83C404                      add esp, 4
+   164 00000185 EB0E                        jmp final
+   165                                          
+   166                                      yes:
+   167                                          ; capp printf for YES
+   168 00000187 68[92000000]                    push dword print_yes
+   169 0000018C FF15[00000000]                  call [printf]
+   170 00000192 83C404                          add esp, 4
+   171                                        
+   172                                  
+   173                                      final:
+   174 00000195 6A00                        push dword 0
+   175 00000197 FF15[00000000]              call [exit]
+   176                                      
+   177                                      

@@ -1,0 +1,55 @@
+     1                                  ;being given a string of bytes containing lowercase letters, build a new string of bytes containing the corresponing uppercase letters
+     2                                  
+     3                                  bits 32 
+     4                                  global start 
+     5                                  extern exit
+     6                                  import exit msvcrt.dll
+     7                                  
+     8                                  segment data use32 class = data:
+     9 00000000 61626364656667              source_string db 'a','b','c','d','e','f','g'
+    10                                      lens equ $-source_string
+    11 00000007 00<rept>                    destination_string times lens db 0
+    12                                      
+    13                                  segment code use32 class = code:
+    14                                  start:
+    15 00000000 BE[00000000]                mov esi, source_string          ; we move the offset of the source_string in esi
+    16 00000005 BF[07000000]                mov edi, destination_string     ; we move the offset of the destination_string in edi 
+    17 0000000A B907000000                  mov ecx, lens                   ; prepare ecx for the loop
+    18 0000000F E307                        jecxz final                     ;we check if ecx is zero
+    19 00000011 FC                          cld                             ; clear the direction flag, now df = 0
+    20                                                                      ; if DF=0, the string'll bw rewad from left to right, if DF=1, the string'll be read from right to left
+    21                                      myloop:
+    22 00000012 AC                              lodsb                       ; the first byte from the source_string(esi) is loaded in AL
+    23                                                                      ; mov al, [esi], inc esi
+    24 00000013 2C20                            sub al, 'a' - 'A'           ; we transform the letter from lowercase into uppercase using the ASCII code
+    25 00000015 AA                              stosb                       ; AL is save in the destination_string (edi)
+    26                                                                      ; mov [edi], al,  inc edi 
+    27                                          
+    28 00000016 E2FA                        loop myloop
+    29                                      
+    30                                      final:
+    31 00000018 6A00                        push dword 0
+    32 0000001A FF15[00000000]              call [exit]
+    33                                  
+    34                                  
+    35                                  
+    36                                  
+    37                                  
+    38                                  
+    39                                  
+    40                                  
+    41                                  
+    42                                  
+    43                                  
+    44                                  
+    45                                  
+    46                                  
+    47                                  
+    48                                  
+    49                                  
+    50                                  
+    51                                  
+    52                                  
+    53                                  
+    54                                  
+    55                                  

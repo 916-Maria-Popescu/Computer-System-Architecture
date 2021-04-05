@@ -1,0 +1,35 @@
+     1                                  ;being given a string of bytes, build a new string of bytes, with the same bytes from the forst string, but in a reverse order
+     2                                  ; ex: string1 = 12h, 20h, 1234h, 444h
+     3                                  ;     string2 = 444h, 1234h, 20h, 12h
+     4                                  
+     5                                  bits 32 
+     6                                  global start 
+     7                                  extern exit
+     8                                  import exit msvcrt.dll
+     9                                  
+    10                                  segment data use32 class = data:
+    11 00000000 1277128800                  source_string db 12h, 77h, 12h, 88h, 0h
+    12                                      lens equ $-source_string
+    13 00000005 00<rept>                    destination_string times lens db 0
+    14                                      
+    15                                  segment code use32 class = code:
+    16                                  start:
+    17 00000000 BE[00000000]                mov esi, source_string          ; we move the offset of the source_string in esi
+    18 00000005 BF[05000000]                mov edi, destination_string     ; we move the offset of the destination_string in edi 
+    19 0000000A 83C704                      add edi, lens-1                 ; we need to travers the string from right to left, so the offset of edi needs to be at the last elem
+    20 0000000D B905000000                  mov ecx, lens                   ; prepare ecx for the loop
+    21 00000012 E306                        jecxz final                     ;we check if ecx is zero
+    22                                      
+    23                                      myloop:
+    24 00000014 FC                              cld                         ; DF (direction flag) = 0, so the string'll bw traversed from left to right
+    25 00000015 AC                              lodsb                       ; the first byte from the source_string(esi) is loaded in AL
+    26                                                                      ; mov al, [esi], inc esi
+    27                                                                      
+    28 00000016 FD                              std                         ; DF (direction flag) = 1, so the string'll bw traversed from right to left
+    29 00000017 AA                              stosb                       ; AL is save in the destination_string (edi)
+    30                                                                      ; mov [edi], al,  inc edi
+    31                                      
+    32 00000018 E2FA                        loop myloop
+    33                                      final:
+    34 0000001A 6A00                        push dword 0
+    35 0000001C FF15[00000000]              call [exit]

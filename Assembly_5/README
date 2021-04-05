@@ -1,0 +1,2 @@
+Let there b a file - the name is given in the data segment - that contains several grades separated by space (the grades are from 1 to 10). 
+Read those grades and calculate the sum of the grades that are less than 8. Write the result at the end of the file.

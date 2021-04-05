@@ -1,0 +1,4 @@
+Small assembly language program (x86):
+- modular programming
+- A string of numbers in base 10 unsign is read from the keyboard.
+ Determine the maximum value in the string and display it in the max.txt file; (file will be created) the maximum value, in base 16

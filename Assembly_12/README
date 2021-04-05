@@ -1,0 +1,4 @@
+Small program in Assembly language (x86): 
+-being given a string of bytes, build a new string of bytes, with the same bytes from the forst string, but in a reverse order
+- ex:  string1 = 12h, 20h, 1234h, 444h
+         string2 = 444h, 1234h, 20h, 12h

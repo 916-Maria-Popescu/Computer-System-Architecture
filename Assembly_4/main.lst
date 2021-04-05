@@ -1,0 +1,131 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, printf, scanf, fopen, fclose, fprintf
+     6                                  import exit msvcrt.dll
+     7                                  import printf msvcrt.dll
+     8                                  import scanf msvcrt.dll
+     9                                  import fopen msvcrt.dll
+    10                                  import fclose msvcrt.dll
+    11                                  import fprintf msvcrt.dll
+    12                                  
+    13                                  ; 617269614D
+    14                                  
+    15                                  segment data use32 class=data
+    16 00000000 00                              len db 0
+    17 00000001 00<rept>                        array times 100 db 0
+    18                                  
+    19 00000065 00000000                        number dd 0
+    20 00000069 256300                          read_format db "%c", 0
+    21 0000006C 256300                          print_format db "%c", 0
+    22                                          
+    23 0000006F 00                              no_of_digits db 0
+    24                                          
+    25 00000070 FFFFFFFF                        file_descriptor dd -1
+    26 00000074 74657874322E747874-             file_name db "text2.txt", 0
+    26 0000007D 00                 
+    27 0000007E 6100                            access_mode db "a", 0
+    28                                  segment code use32 class=code
+    29                                      start:
+    30 00000000 68[7E000000]                    push dword access_mode
+    31 00000005 68[74000000]                    push dword file_name
+    32 0000000A FF15[00000000]                  call [fopen]
+    33 00000010 83C408                          add esp, 4 * 2
+    34                                          
+    35 00000013 83F800                          cmp eax, 0
+    36 00000016 0F8406010000                    je final
+    37                                          
+    38 0000001C A3[70000000]                    mov [file_descriptor], eax
+    39                                          
+    40 00000021 BF[01000000]                    mov edi, array
+    41                                          read_nos:
+    42 00000026 C705[65000000]0000-                 mov dword [number], 0
+    42 0000002E 0000               
+    43                                          
+    44 00000030 68[65000000]                        push number
+    45 00000035 68[69000000]                        push read_format
+    46 0000003A FF15[00000000]                      call [scanf]
+    47 00000040 83C408                              add esp, 4 * 2
+    48                                              
+    49 00000043 803D[65000000]30                    cmp byte [number], '0'
+    50 0000004A 7266                                jb end_loop
+    51 0000004C 803D[65000000]39                    cmp byte [number], '9'
+    52 00000053 7614                                jbe is_digit
+    53 00000055 803D[65000000]41                    cmp byte [number], 'A'
+    54 0000005C 7254                                jb end_loop
+    55 0000005E 803D[65000000]5A                    cmp byte [number], 'Z'
+    56 00000065 760B                                jbe is_letter
+    57 00000067 EB49                                jmp end_loop
+    58                                              
+    59                                              is_digit:
+    60 00000069 802D[65000000]30                        sub byte [number], '0'
+    61 00000070 EB0E                                    jmp continue
+    62                                              is_letter:
+    63 00000072 802D[65000000]41                        sub byte [number], 'A'
+    64 00000079 8005[65000000]0A                        add byte [number], 10   
+    65                                              continue:
+    66                                              
+    67 00000080 FE05[6F000000]                      inc byte [no_of_digits]
+    68 00000086 803D[6F000000]02                    cmp byte [no_of_digits], 2
+    69 0000008D 7518                                jne skip_processing
+    70                                              
+    71 0000008F B010                                mov al, 16
+    72 00000091 F6E3                                mul bl
+    73 00000093 0205[65000000]                      add al, byte [number]
+    74 00000099 AA                                  stosb
+    75 0000009A FE05[00000000]                      inc byte [len]
+    76                                              
+    77 000000A0 C605[6F000000]00                    mov byte [no_of_digits], 0
+    78                                              
+    79                                              skip_processing:
+    80                                              
+    81 000000A7 8A1D[65000000]                      mov bl, [number] ; this is the last number, here it will be saved
+    82 000000AD E974FFFFFF                      jmp read_nos
+    83                                              
+    84                                          end_loop:
+    85                                          
+    86 000000B2 FE0D[00000000]                  dec byte [len]
+    87                                          
+    88 000000B8 B800000000                      mov eax, 0
+    89 000000BD A0[00000000]                    mov al, byte [len]
+    90                                          
+    91 000000C2 60                              pushad
+    92 000000C3 BB00000000                      mov ebx, 0
+    93 000000C8 8A98[01000000]                  mov bl, byte [array + eax]
+    94 000000CE 53                              push ebx
+    95 000000CF 68[6C000000]                    push print_format
+    96 000000D4 FF35[70000000]                  push dword [file_descriptor]
+    97 000000DA FF15[00000000]                  call [fprintf]
+    98 000000E0 83C40C                          add esp, 4 * 3
+    99 000000E3 61                              popad
+   100                                          
+   101 000000E4 C680[01000000]00                mov byte [array + eax], 0
+   102                                          
+   103 000000EB BE[01000000]                    mov esi, array
+   104                                          loop_code:
+   105 000000F0 B800000000                          mov eax, 0
+   106 000000F5 AC                                  lodsb
+   107                                              
+   108 000000F6 3C00                                cmp al, 0
+   109 000000F8 7419                                je exit_loop
+   110                                              
+   111 000000FA 60                                  pushad
+   112 000000FB 50                                  push eax
+   113 000000FC 68[6C000000]                        push print_format
+   114 00000101 FF35[70000000]                      push dword [file_descriptor]
+   115 00000107 FF15[00000000]                      call [fprintf]
+   116 0000010D 83C40C                              add esp, 4 * 3
+   117 00000110 61                                  popad
+   118 00000111 75DD                            jne loop_code
+   119                                          
+   120                                          exit_loop:
+   121                                          
+   122 00000113 FF35[70000000]                  push dword [file_descriptor]
+   123 00000119 FF15[00000000]                  call [fclose]
+   124 0000011F 83C404                          add esp, 4 * 1
+   125                                          
+   126                                          final:
+   127                                          
+   128 00000122 6A00                            push    dword 0
+   129 00000124 FF15[00000000]                  call    [exit]

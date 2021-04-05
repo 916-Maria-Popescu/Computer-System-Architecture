@@ -1,5 +1,3 @@
-; Se citeste un numar n de la tastatura n 
-
 
 bits 32
 global start

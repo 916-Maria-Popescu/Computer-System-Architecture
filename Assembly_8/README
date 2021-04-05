@@ -1,0 +1,2 @@
+Small program in Assembly language (x86): 
+- being given a string of bytes containing lowercase letters, build a new string of bytes containing the corresponing uppercase letters

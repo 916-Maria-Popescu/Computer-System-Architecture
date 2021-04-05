@@ -1,0 +1,2 @@
+Small program in Assembly language (x86): 
+- computes the expresion x = a * b + c * d where all numbers are unsigned and represented on a word

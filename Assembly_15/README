@@ -1,0 +1,3 @@
+Small assembly language program (x86):
+-Read a number in base 10 and one in base 16 from the keyboard
+-Display in base 10 the number of bits "1" from the sum of the two numbers

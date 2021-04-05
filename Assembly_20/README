@@ -1,0 +1,3 @@
+Small assembly language program (x86):
+- A coded message is read from the  keyboard by turning the letters once to the left, and then by transforming each letter into the ascii code.
+- display the uncoded message

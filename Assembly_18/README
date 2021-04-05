@@ -1,0 +1,2 @@
+Small Assembly language program (x86):
+ - read numbers from the file, add 1 to each read byte and then write the resulting bytes in a new file and then rename this new file with the name of the old file

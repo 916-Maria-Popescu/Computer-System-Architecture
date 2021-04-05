@@ -1,0 +1,2 @@
+Small program in Assembly language (x86): 
+-A number a (integer in decimal) is given from the keyboard. Print the number in base 10 and then in base 16 (signed representation)
